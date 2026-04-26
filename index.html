@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ICG Compiler</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+
+<div class="page">
+    <header class="header">
+        <div>
+            <div class="title">ICG Compiler GUI</div>
+            <div class="subtitle">C expression → 3AC (TAC) → Python</div>
+        </div>
+        <div class="badge">Intermediate Code Generator</div>
+    </header>
+
+    <main class="grid">
+        <section class="card">
+            <div class="cardHeader">
+                <div class="cardTitle">Input</div>
+                <div class="cardHint">Tip: end statements with <code>;</code></div>
+            </div>
+
+            <form method="POST" class="form">
+                <textarea
+                    id="code"
+                    name="code"
+                    spellcheck="false"
+                    placeholder="Example:&#10;a = b + c * d;"
+                >{{ code or "" }}</textarea>
+
+                <div class="row">
+                    <button class="btn primary" type="submit">Run</button>
+                    <button class="btn" type="button" id="clearBtn">Clear</button>
+                    <button class="btn" type="button" id="exampleBtn">Load example</button>
+                    <label class="fileBtn btn" for="fileInput">Open file</label>
+                    <input id="fileInput" type="file" accept=".c,.txt" hidden />
+                </div>
+                <div class="row subtle">
+                    <span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> to run
+                    <span class="spacer"></span>
+                    <button class="linkBtn" type="button" id="copyInputBtn">Copy input</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card">
+            <div class="cardHeader">
+                <div class="cardTitle">Output</div>
+                <div class="cardHint">3AC and Python generated here</div>
+            </div>
+
+            {% if error %}
+            <div class="alert" role="alert">
+                <div class="alertTitle">Message</div>
+                <pre class="alertBody">{{ error }}</pre>
+            </div>
+            {% endif %}
+
+            <div class="tabs">
+                <button class="tab active" type="button" data-tab="tac">3AC</button>
+                <button class="tab" type="button" data-tab="py">Python</button>
+                <button class="tab" type="button" data-tab="lex">Lexical</button>
+                <button class="tab" type="button" data-tab="tree">Parse Tree</button>
+                <span class="spacer"></span>
+                <button class="linkBtn" type="button" id="copyOutBtn">Copy shown</button>
+            </div>
+
+            <div class="panel active" id="panel-tac">
+                <pre id="outTac">{{ tac_output or "" }}</pre>
+            </div>
+            <div class="panel" id="panel-py">
+                <pre id="outPy">{{ python_output or "" }}</pre>
+            </div>
+            <div class="panel" id="panel-lex">
+                <pre id="outLex">{{ lex_output or "" }}</pre>
+            </div>
+            <div class="panel" id="panel-tree">
+                {% if parse_message %}
+                <div class="treeMsg">Parser note: <span class="muted">{{ parse_message }}</span></div>
+                {% endif %}
+                <div class="treeControls">
+                    <button class="btn" type="button" id="treeResetBtn">Reset</button>
+                    <button class="btn primary" type="button" id="treeNextBtn">Next step</button>
+                    <button class="btn" type="button" id="treeAutoBtn">Auto build</button>
+                    <div class="treeHint">Tip: click “Next step” to grow the tree</div>
+                </div>
+                <div id="treeRoot" class="tree"></div>
+                <script id="treeData" type="application/json">{{ (parse_tree_json or "{}")|safe }}</script>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <span class="muted">If output is blank, check the message panel above.</span>
+    </footer>
+</div>
+
+<script>
+(() => {
+  const code = document.getElementById('code');
+  const clearBtn = document.getElementById('clearBtn');
+  const exampleBtn = document.getElementById('exampleBtn');
+  const fileInput = document.getElementById('fileInput');
+  const copyInputBtn = document.getElementById('copyInputBtn');
+  const copyOutBtn = document.getElementById('copyOutBtn');
+
+  const tabs = Array.from(document.querySelectorAll('.tab'));
+  const panels = {
+    tac: document.getElementById('panel-tac'),
+    py: document.getElementById('panel-py'),
+    lex: document.getElementById('panel-lex'),
+    tree: document.getElementById('panel-tree'),
+  };
+
+  const getShownOutput = () => {
+    const active = document.querySelector('.tab.active')?.dataset?.tab || 'tac';
+    if (active === 'py') return (document.getElementById('outPy')?.innerText || '');
+    if (active === 'lex') return (document.getElementById('outLex')?.innerText || '');
+    if (active === 'tree') return (document.getElementById('treeRoot')?.innerText || '');
+    return (document.getElementById('outTac')?.innerText || '');
+  };
+
+  const copyText = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // fallback for older browsers
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+  };
+
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    const key = t.dataset.tab;
+    Object.values(panels).forEach(p => p.classList.remove('active'));
+    panels[key].classList.add('active');
+  }));
+
+  clearBtn.addEventListener('click', () => {
+    code.value = '';
+    code.focus();
+  });
+
+  exampleBtn.addEventListener('click', () => {
+    code.value = 'a = b + c * d;\\n';
+    code.focus();
+  });
+
+  fileInput.addEventListener('change', async () => {
+    const f = fileInput.files && fileInput.files[0];
+    if (!f) return;
+    const text = await f.text();
+    code.value = text;
+    code.focus();
+    fileInput.value = '';
+  });
+
+  copyInputBtn.addEventListener('click', async () => {
+    await copyText(code.value || '');
+  });
+
+  copyOutBtn.addEventListener('click', async () => {
+    await copyText(getShownOutput());
+  });
+
+  // Ctrl+Enter to run
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      const form = document.querySelector('form');
+      form && form.requestSubmit && form.requestSubmit();
+    }
+  });
+
+  // Parse tree: step-by-step reveal ("rain" effect)
+  const treeDataEl = document.getElementById('treeData');
+  const treeRoot = document.getElementById('treeRoot');
+  const treeResetBtn = document.getElementById('treeResetBtn');
+  const treeNextBtn = document.getElementById('treeNextBtn');
+  const treeAutoBtn = document.getElementById('treeAutoBtn');
+
+  const safeJson = (txt) => {
+    try { return JSON.parse(txt || '{}'); } catch { return {}; }
+  };
+
+  const buildTreeIndex = (data) => {
+    const byId = new Map();
+    const children = new Map();
+    (data.nodes || []).forEach(n => {
+      byId.set(n.id, n);
+      if (!children.has(n.parentId)) children.set(n.parentId, []);
+      children.get(n.parentId).push(n.id);
+    });
+    return { byId, children, order: data.order || [] };
+  };
+
+  const renderNodeEl = (n) => {
+    const el = document.createElement('div');
+    el.className = 'treeNode';
+    const label = document.createElement('div');
+    label.className = 'treeLabel';
+    label.textContent = n.value ? `${n.kind}(${n.value})` : n.kind;
+    const kids = document.createElement('div');
+    kids.className = 'treeKids';
+    el.appendChild(label);
+    el.appendChild(kids);
+    return el;
+  };
+
+  const resetTree = () => {
+    treeRoot.innerHTML = '';
+    const data = safeJson(treeDataEl?.textContent);
+    const idx = buildTreeIndex(data);
+    if (treeRoot._tree?.timer) {
+      clearInterval(treeRoot._tree.timer);
+    }
+    treeRoot._tree = { idx, shown: new Set(), els: new Map(), cursor: 0, timer: null };
+    if (treeAutoBtn) treeAutoBtn.textContent = 'Auto build';
+  };
+
+  const revealNext = () => {
+    const st = treeRoot._tree;
+    if (!st) return;
+    const id = st.idx.order[st.cursor];
+    if (!id) return;
+    st.cursor += 1;
+    if (st.shown.has(id)) return;
+    st.shown.add(id);
+    const node = st.idx.byId.get(id);
+    if (!node) return;
+
+    const el = renderNodeEl(node);
+    st.els.set(id, el);
+
+    const parentId = node.parentId;
+    if (parentId == null) {
+      treeRoot.appendChild(el);
+    } else {
+      const parentEl = st.els.get(parentId);
+      const kids = parentEl && parentEl.querySelector('.treeKids');
+      (kids || treeRoot).appendChild(el);
+    }
+  };
+
+  treeResetBtn && treeResetBtn.addEventListener('click', resetTree);
+  treeNextBtn && treeNextBtn.addEventListener('click', revealNext);
+  treeAutoBtn && treeAutoBtn.addEventListener('click', () => {
+    const st = treeRoot._tree;
+    if (!st) return;
+    if (st.timer) {
+      clearInterval(st.timer);
+      st.timer = null;
+      treeAutoBtn.textContent = 'Auto build';
+      return;
+    }
+    treeAutoBtn.textContent = 'Stop';
+    st.timer = setInterval(() => {
+      const before = st.cursor;
+      revealNext();
+      // stop when nothing left
+      if (st.cursor === before || st.cursor >= st.idx.order.length) {
+        clearInterval(st.timer);
+        st.timer = null;
+        treeAutoBtn.textContent = 'Auto build';
+      }
+    }, 250);
+  });
+  resetTree();
+})();
+</script>
+
+</body>
+</html>

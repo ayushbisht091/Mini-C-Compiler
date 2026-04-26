@@ -1,0 +1,344 @@
+:root{
+  --bg: #0f1115;
+  --panel: #171a21;
+  --panel2: #12141a;
+  --text: #e7eaf0;
+  --muted: #a9b0be;
+  --border: rgba(255,255,255,.08);
+  --accent: #7c5cff;
+  --accent2: #00d4ff;
+  --danger: #ff4d6d;
+}
+
+*{ box-sizing: border-box; }
+
+body{
+  margin: 0;
+  background: radial-gradient(1200px 500px at 20% -10%, rgba(124,92,255,.25), transparent 60%),
+              radial-gradient(900px 400px at 90% 0%, rgba(0,212,255,.18), transparent 55%),
+              var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+}
+
+code{ color: #d3d7e2; }
+
+.page{
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 16px 28px;
+}
+
+.header{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.title{
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: .2px;
+}
+
+.subtitle{
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.badge{
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.02);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 920px){
+  .grid{ grid-template-columns: 1fr; }
+}
+
+.card{
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0,0,0,.35);
+}
+
+.cardHeader{
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cardTitle{
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: .2px;
+}
+
+.cardHint{
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.form{
+  padding: 12px 14px 14px;
+}
+
+textarea{
+  width: 100%;
+  min-height: 340px;
+  resize: vertical;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  outline: none;
+  padding: 12px 12px;
+  background: var(--panel2);
+  color: var(--text);
+  line-height: 1.45;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+}
+
+textarea:focus{
+  border-color: rgba(124,92,255,.55);
+  box-shadow: 0 0 0 4px rgba(124,92,255,.18);
+}
+
+.row{
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.row.subtle{
+  margin-top: 10px;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.spacer{ flex: 1; }
+
+.btn{
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.03);
+  color: var(--text);
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn:hover{
+  border-color: rgba(255,255,255,.18);
+  background: rgba(255,255,255,.05);
+}
+
+.btn.primary{
+  border-color: rgba(124,92,255,.55);
+  background: linear-gradient(180deg, rgba(124,92,255,.35), rgba(124,92,255,.18));
+}
+
+.btn.primary:hover{
+  border-color: rgba(124,92,255,.75);
+}
+
+.fileBtn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.linkBtn{
+  border: 0;
+  background: transparent;
+  color: #c7ccda;
+  cursor: pointer;
+  padding: 6px 6px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.linkBtn:hover{
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.kbd{
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,.2);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 11px;
+  color: #d5daea;
+}
+
+.alert{
+  margin: 12px 14px 0;
+  border-radius: 12px;
+  border: 1px solid rgba(255,77,109,.35);
+  background: rgba(255,77,109,.08);
+  overflow: hidden;
+}
+
+.alertTitle{
+  padding: 10px 12px 8px;
+  font-weight: 900;
+  color: #ffd1d9;
+  font-size: 13px;
+}
+
+.alertBody{
+  margin: 0;
+  padding: 0 12px 12px;
+  color: #ffdbe2;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: transparent;
+  border: 0;
+}
+
+.tabs{
+  padding: 12px 14px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab{
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.03);
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.tab.active{
+  border-color: rgba(0,212,255,.5);
+  background: rgba(0,212,255,.10);
+}
+
+.panel{
+  display: none;
+  padding: 12px 14px 14px;
+}
+
+.panel.active{
+  display: block;
+}
+
+pre{
+  margin: 0;
+  padding: 12px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #0b0d12;
+  color: var(--text);
+  overflow: auto;
+  white-space: pre;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+  line-height: 1.45;
+  min-height: 340px;
+}
+
+.treeControls{
+  padding: 12px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.treeHint{
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.treeMsg{
+  margin: 10px 0 6px;
+  color: #d3d7e2;
+  font-size: 12px;
+}
+
+.tree{
+  min-height: 340px;
+  padding: 12px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #0b0d12;
+  overflow: auto;
+}
+
+.treeNode{
+  position: relative;
+  margin: 6px 0;
+  padding-left: 14px;
+}
+
+.treeNode::before{
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0.9em;
+  width: 8px;
+  height: 1px;
+  background: rgba(255,255,255,.14);
+}
+
+.treeLabel{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  cursor: default;
+}
+
+.treeLabel{
+  user-select: none;
+}
+
+.treeKids{
+  margin-left: 18px;
+  border-left: 1px dashed rgba(255,255,255,.10);
+  padding-left: 12px;
+}
+
+.footer{
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 2px 2px;
+}
+
+.muted{ color: var(--muted); }
